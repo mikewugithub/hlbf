@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {UUPSUpgradeable} from "openzeppelin/proxy/utils/UUPSUpgradeable.sol";
-import {Initializable} from "openzeppelin/proxy/utils/Initializable.sol";
-import {RolesUtil} from "../libraries/RolesUtil.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import {IAuthority} from "../interfaces/IAuthority.sol";
-import {ISanctions} from "../interfaces/ISanctions.sol";
+import {IAuthority} from "../../interfaces/IAuthority.sol";
 
-import "../config/enums.sol";
-import "../config/errors.sol";
+import "../../config/errors.sol";
 
 /// @notice Role based Authority that supports up to 256 roles.
 /// @author Modified from Solmate (https://github.com/transmissions11/solmate/blob/main/src/auth/authorities/RolesAuthority.sol)
 /// @author Modified from Dappsys (https://github.com/dapphub/ds-roles/blob/master/src/roles.sol)
 contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
-    using RolesUtil for bytes32;
     /*///////////////////////////////////////////////////////////////
                          Immutables
     //////////////////////////////////////////////////////////////*/
