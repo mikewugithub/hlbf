@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IMintableBurnable} from "../../interfaces/IMintableBurnable.sol";
 import {IAuthority} from "../../interfaces/IAuthority.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin-upgradeable/contracts/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {Initializable} from "@openzeppelin-upgradeable/contracts/proxy/utils/Initializable.sol";
 
 import "../../config/errors.sol";
 import {Role} from "../../config/roles.sol";
@@ -15,7 +15,7 @@ import {Role} from "../../config/roles.sol";
  * @title FundToken
  * @dev A basic ERC20 token with minting and burning capabilities
  */
-contract FundToken is ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradeable, Initializable {
+contract FundToken is ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradeable {
 
     IAuthority public immutable authority;
 
@@ -25,8 +25,8 @@ contract FundToken is ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradea
     address public burner;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(address authority_) ERC20("", "") {
-        if (_authority == address(0)) revert();
+    constructor(address authority_)  ERC20() initializer  {
+        if (authority_ == address(0)) revert();
         authority = IAuthority(authority_);
         _disableInitializers();
     }
@@ -40,7 +40,6 @@ contract FundToken is ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradea
         string memory name_,
         string memory symbol_
     ) external initializer {
-        __ERC20_init(name_, symbol_);
         __Ownable_init();
         __UUPSUpgradeable_init();
         

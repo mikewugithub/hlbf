@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {Initializable} from "@openzeppelin-upgradeable/contracts/proxy/utils/Initializable.sol";
+import {Role} from "../../config/roles.sol";
 
 import {IAuthority} from "../../interfaces/IAuthority.sol";
 
@@ -57,10 +58,6 @@ contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
 
     function doesUserHaveRole(address user, Role role) public view virtual returns (bool) {
         if (_paused) revert Unauthorized();
-
-        if (uint8(role) <= uint8(Role.Investor_Reserve5)) {
-            if (sanctions.isSanctioned(user)) return false;
-        }
 
         return getUserRoles[user].doesHaveRole(role);
     }
@@ -134,7 +131,6 @@ contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
 
     function setUserRole(address user, Role role, bool enabled) public virtual {
         if (role == Role.System_FundAdmin) _assertOwner();
-        else if (uint8(role) > uint8(Role.Investor_Reserve5)) _assertFundAdmin();
         else _assertPermissions();
 
         _setUserRole(user, role, enabled);
@@ -172,8 +168,6 @@ contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
 
         _paused = true;
         emit Paused(msg.sender);
-
-        if (address(messenger) != address(0)) messenger.broadcast(msg.data);
     }
 
     /**

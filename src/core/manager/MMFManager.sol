@@ -2,13 +2,13 @@
 pragma solidity ^0.8.0;
 
 // imported contracts and libraries
-import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin-upgradeable/contracts/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {Initializable} from "@openzeppelin-upgradeable/contracts/proxy/utils/Initializable.sol";
 
 import "forge-std/console.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -33,7 +33,7 @@ import {Role} from "../../config/roles.sol";
  *          - Fee management: Applies buy/sell fees for fund operations
  *          - Price oracle integration: Uses an oracle to determine token prices
  */
-contract MMFManager is OwnableUpgradeable, UUPSUpgradeable, Initializable {
+contract MMFManager is OwnableUpgradeable, UUPSUpgradeable {
     using FixedPointMathLib for uint256;
     using SafeERC20 for IERC20;
     using SafeERC20 for IERC20Metadata;
@@ -98,41 +98,27 @@ contract MMFManager is OwnableUpgradeable, UUPSUpgradeable, Initializable {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Constructor is disabled for upgradeable contracts
-     */
-    constructor() {
-        _disableInitializers();
-    }
-
-    /**
-     * @notice Initializes the MMF Manager with required parameters
+     * @notice Constructor 
      * @param _ytoken Address of the fund token contract
      * @param _oracle Address of the price oracle
      * @param _authority Address of the authority contract for access control
      * @param _feeRecipient Address that will receive fees
      * @param _stable Address of the stable coin used for transactions
-     * @param _buyFee Fee percentage for buying tokens (in basis points)
-     * @param _sellFee Fee percentage for selling tokens (in basis points)
      */
-    function initialize(
+    constructor(       
         address _ytoken,
         address _oracle,
         address _authority,
         address _feeRecipient,
-        address _stable,
-        uint256 _buyFee,
-        uint256 _sellFee,
-        bool _instantSubscription,
-        bool _instantRedemption
-    ) external initializer {
-        __Ownable_init();
-        __UUPSUpgradeable_init();
+        address _stable) initializer{
 
         if (_ytoken == address(0)) revert BadAddress();
         if (_oracle == address(0)) revert BadAddress();
         if (_authority == address(0)) revert BadAddress();
         if (_feeRecipient == address(0)) revert BadAddress();
         if (_stable == address(0)) revert BadAddress();
+
+
 
         ytoken = FundToken(_ytoken);
         _ytokenDecimals = ytoken.decimals();
@@ -146,6 +132,24 @@ contract MMFManager is OwnableUpgradeable, UUPSUpgradeable, Initializable {
         stable = IERC20Metadata(_stable);
         _stableDecimals = stable.decimals();
         
+    }
+
+    /**
+     * @notice Initializes the MMF Manager with required parameters
+
+     * @param _buyFee Fee percentage for buying tokens (in basis points)
+     * @param _sellFee Fee percentage for selling tokens (in basis points)
+     */
+    function initialize(
+         address _owner,
+        uint256 _buyFee,
+        uint256 _sellFee,
+        bool _instantSubscription,
+        bool _instantRedemption
+    ) external initializer {
+        if (_owner == address(0)) revert BadAddress();
+        _transferOwnership(_owner);
+
         buyFee = _buyFee;
         sellFee = _sellFee;
         instantSubscription = _instantSubscription;

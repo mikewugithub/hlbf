@@ -12,10 +12,6 @@ optimizer_runs = 200
 [rpc_endpoints]
 bsc-mainnet = "https://bsc-dataseed.binance.org/"
 bsc-testnet = "https://data-seed-prebsc-1-s1.binance.org:8545"
-bsc_testnet = "${BSC_TESTNET_RPC_URL}"
 
 # You can set a default for the script:
 default_rpc_url = "bsc-testnet"
-
-[etherscan]
-bsc_testnet = { key = "${BSCSCAN_API_KEY}" }

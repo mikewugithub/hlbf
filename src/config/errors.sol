@@ -8,6 +8,7 @@ pragma solidity ^0.8.0;
 error NoAccess();
 error NoUnderlying();
 error NotPermissioned();
+error Unauthorized();
 
 /* ------------------------ *
  *      Token Errors         *

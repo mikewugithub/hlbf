@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
 import {MMFManager} from "../src/core/manager/MMFManager.sol";
 import {FundToken} from "../src/core/token/FundToken.sol";
 import {IAuthority} from "../src/interfaces/IAuthority.sol";
@@ -29,20 +30,22 @@ contract DeployScript is Script {
             "TFT"              // symbol
         );
 
-        // 2. Deploy MMFManager
-        MMFManager mmfManager = new MMFManager();
-        
-        // Initialize MMFManager
-        mmfManager.initialize(
+        // 2. Deploy MMFManager with constructor parameters
+        MMFManager mmfManager = new MMFManager(
             address(fundToken),    // _ytoken
             MOCK_ORACLE,          // _oracle
             MOCK_AUTHORITY,       // _authority
             FEE_RECIPIENT,        // _feeRecipient
-            MOCK_STABLE,          // _stable
-            1e16,                 // _buyFee (1%)
-            1e16,                 // _sellFee (1%)
-            true,                 // _instantSubscription
-            true                  // _instantRedemption
+            MOCK_STABLE          // _stable
+        );
+        
+        // Initialize MMFManager with initialize parameters
+        mmfManager.initialize(
+            address(this),        // _owner
+            1e16,                // _buyFee (1%)
+            1e16,                // _sellFee (1%)
+            true,                // _instantSubscription
+            true                 // _instantRedemption
         );
 
         // 3. Set MMFManager as minter and burner in FundToken
