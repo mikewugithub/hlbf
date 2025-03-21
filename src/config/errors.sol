@@ -21,6 +21,7 @@ error BadPrice();
 error BadOracleDecimals();
 error FeesPending();
 error InvalidSignature();
+error InsufficientStableBalance();
 
 /* ------------------------ *
  *    Aggregators Errors    *

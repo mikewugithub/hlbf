@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20} from "./ERC20.sol";
 import {IMintableBurnable} from "../../interfaces/IMintableBurnable.sol";
 import {IAuthority} from "../../interfaces/IAuthority.sol";
 import {OwnableUpgradeable} from "@openzeppelin-upgradeable/contracts/access/OwnableUpgradeable.sol";
@@ -15,7 +15,7 @@ import {Role} from "../../config/roles.sol";
  * @title FundToken
  * @dev A basic ERC20 token with minting and burning capabilities
  */
-contract FundToken is ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradeable {
+contract FundToken is Initializable, ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradeable {
 
     IAuthority public immutable authority;
 
@@ -24,27 +24,49 @@ contract FundToken is ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradea
     /// @notice The address that has permission to burn tokens
     address public burner;
 
+    /// @notice The number of decimals for the token
+    uint256 internal _decimals;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(address authority_)  ERC20() initializer  {
+    constructor(address authority_)  ERC20() {
         if (authority_ == address(0)) revert();
         authority = IAuthority(authority_);
         _disableInitializers();
     }
 
+
     /**
      * @dev Initializes the contract with token name, symbol and initial settings
+     * @param _owner The initial owner of the contract
      * @param name_ The name of the token
      * @param symbol_ The symbol of the token
+     * @param minter_ The initial minter address
+     * @param burner_ The initial burner address
+     * @param decimals_ The number of decimals for the token
      */
     function initialize(
+        address _owner,
         string memory name_,
-        string memory symbol_
+        string memory symbol_,
+        address minter_,
+        address burner_,
+        uint8 decimals_
     ) external initializer {
-        __Ownable_init();
+        __Ownable_init(_owner);
         __UUPSUpgradeable_init();
         
-        minter = address(0);
-        burner = address(0);
+        // Initialize ERC20 state
+        name = name_;
+        symbol = symbol_;
+        
+        // Initialize FundToken state
+        minter = minter_;
+        burner = burner_;
+        _decimals = decimals_;
+        
+        // Validate addresses
+        if (minter_ == address(0)) revert();
+        if (burner_ == address(0)) revert();
     }
 
     /**
@@ -105,4 +127,9 @@ contract FundToken is ERC20, IMintableBurnable, OwnableUpgradeable, UUPSUpgradea
     function burnFrom(address from, uint256 amount) external onlyBurner {
         _burn(from, amount);
     }
+
+    function decimals() public view returns (uint8) {
+        return uint8(_decimals);
+    }
+
 }

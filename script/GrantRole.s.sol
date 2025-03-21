@@ -7,7 +7,7 @@ import {Role} from "../src/config/roles.sol";
 
 contract GrantRoleScript is Script {
     // Contract addresses
-    address public constant AUTHORITY = 0x20F3de7a58EA540Ba30F48603d502a34950cD14C;
+    address public constant AUTHORITY = 0x079DBcB0f93bfc1295af73bF357208A1DF0C3e69;
     
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

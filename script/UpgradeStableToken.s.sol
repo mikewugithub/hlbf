@@ -42,20 +42,19 @@ contract UpgradeStableTokenScript is Script {
         //     revert("NEW_STABLE_TOKEN does not implement IERC20Metadata");
         // }
 
-        vm.startBroadcast(deployerPrivateKey);
+        // vm.startBroadcast(deployerPrivateKey);
 
-        MMFManager mmfManagerImpl = new MMFManager(
-            FUND_TOKEN,    // Use proxy address for fundToken
-            FUND_ORACLE,
-            AUTHORITY,    // Use proxy address for authority
-            deployer,
-            NEW_STABLE_TOKEN
-        );
+        // MMFManager mmfManagerImpl = new MMFManager(
+        //     FUND_TOKEN,    // Use proxy address for fundToken
+        //     FUND_ORACLE,
+        //     AUTHORITY,    // Use proxy address for authority
+        //     deployer
+        // );
 
-        // get the setstable function from the impl abi
-        bytes memory setStableData = abi.encodeWithSelector(MMFManager.setStable.selector, NEW_STABLE_TOKEN);
+        // // get the setstable function from the impl abi
+        // bytes memory setStableData = abi.encodeWithSelector(MMFManager.setStable.selector, NEW_STABLE_TOKEN);
 
-        IProxy(MMF_MANAGER).upgradeToAndCall(address(mmfManagerImpl), setStableData);
+        // IProxy(MMF_MANAGER).upgradeToAndCall(address(mmfManagerImpl), setStableData);
         
 
         vm.stopBroadcast();

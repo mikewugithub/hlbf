@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import {UUPSUpgradeable} from "@openzeppelin-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {Initializable} from "@openzeppelin-upgradeable/contracts/proxy/utils/Initializable.sol";
 import {Role} from "../../config/roles.sol";
+import {RolesUtil} from "./RolesUtils.sol";
 
 import {IAuthority} from "../../interfaces/IAuthority.sol";
 
@@ -11,8 +12,8 @@ import "../../config/errors.sol";
 
 /// @notice Role based Authority that supports up to 256 roles.
 /// @author Modified from Solmate (https://github.com/transmissions11/solmate/blob/main/src/auth/authorities/RolesAuthority.sol)
-/// @author Modified from Dappsys (https://github.com/dapphub/ds-roles/blob/master/src/roles.sol)
 contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
+    using RolesUtil for bytes32;
     /*///////////////////////////////////////////////////////////////
                          Immutables
     //////////////////////////////////////////////////////////////*/
@@ -87,12 +88,18 @@ contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
         if (msg.sender != owner) revert Unauthorized();
     }
 
+    function _isSystemAdmin() internal view returns (bool) {
+        return doesUserHaveRole(msg.sender, Role.System_Admin);
+    }
+
     function _assertSystemAdmin() internal view {
-        if (!doesUserHaveRole(msg.sender, Role.System_Admin)) revert Unauthorized();
+        if (!_isSystemAdmin()) revert Unauthorized();
     }
 
     function _assertPermissions() internal view {
-        if (!canCall(msg.sender, address(this), msg.sig)) revert Unauthorized();
+        if (!_isSystemAdmin()) {
+            if (!canCall(msg.sender, address(this), msg.sig)) revert Unauthorized();
+        }
     }
 
     function setPublicCapability(address target, bytes4 functionSig, bool enabled) public virtual {
@@ -104,7 +111,7 @@ contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
     }
 
     function setRoleCapability(Role role, address target, bytes4 functionSig, bool enabled) public virtual {
-        role == Role.System_FundAdmin ? _assertOwner() : _assertPermissions();
+        role == Role.System_Admin ? _assertOwner() : _assertPermissions();
 
         if (enabled) {
             getRolesWithCapability[target][functionSig] |= bytes32(1 << uint8(role));
@@ -130,9 +137,8 @@ contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
     }
 
     function setUserRole(address user, Role role, bool enabled) public virtual {
-        if (role == Role.System_FundAdmin) _assertOwner();
-        else _assertPermissions();
-
+        if (role == Role.System_Admin) _assertOwner();
+        
         _setUserRole(user, role, enabled);
     }
 
@@ -144,8 +150,6 @@ contract RolesAuthority is IAuthority, Initializable, UUPSUpgradeable {
         if (length == 0 || length != roles.length || length != enabled.length) revert InvalidArrayLength();
 
         for (uint256 i; i < length;) {
-            if (uint8(roles[i]) > uint8(Role.Investor_Reserve5)) revert Unauthorized();
-
             _setUserRole(users[i], roles[i], enabled[i]);
 
             unchecked {

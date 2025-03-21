@@ -10,7 +10,7 @@ import {console} from "forge-std/console.sol";
 
 contract SubscribeScript is Script {
     // Contract addresses
-    address public constant MMF_MANAGER = address(0xa34e3c98f7FF644835F193B3a4F8c31F1F95CAE2); // Replace with actual MMFManager address
+    address public constant MMF_MANAGER = address(0x1AFC9E0230cD4358c167E83e64C3A8312eA8581F); // Replace with actual MMFManager address
     address public constant STABLE_TOKEN = 0x64544969ed7EBf5f083679233325356EbE738930; // Replace with actual stable token address
     
     function run() external {
@@ -73,7 +73,7 @@ contract SubscribeScript is Script {
         console.log("Subscriber balance:", IERC20(STABLE_TOKEN).balanceOf(subscriber));
 
         // Subscribe to the fund
-        MMFManager(MMF_MANAGER).subscribeFor(subscriber, subscribeAmount);
+        MMFManager(MMF_MANAGER).subscribe(subscribeAmount);
 
         vm.stopBroadcast();
     }
